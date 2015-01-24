@@ -48,3 +48,25 @@ Commands ran to build this application :
 
 -- Setting the Root Route
 - replace get with root 'static_pages#home'
+
+-- Finish the app
+- Push code to github (merge branch to master) and heroku. 
+
+-- Advanced Testing Setup ##### IMPORTANT ######
+- Add minitest/reporters in test/test_helpers.rb as shown here : https://www.railstutorial.org/book/static_pages#sec-minitest_reporters .
+  This adds coloring and shows moving from Red to Green
+- Update vi config/initializers/backtrace_silencers.rb to remove unwanted lines as shown in https://www.railstutorial.org/book/static_pages#sec-backtrace_silencer
+- Setup Guard as given in here : https://www.railstutorial.org/book/static_pages#sec-guard 
+** the gem file is already included for guard, make sure
+** bundle exec guard init
+** update guardfile with guard :minitest, spring: true, all_on_start: false do
+** Update .gitignore to ignore spring files : /spring/*.pid
+** Open a new terminal window and run : bundle exec guard
+** in the prompt enter runs all the tests. 
+
+-- Box 3.4 Unix Processes : https://www.railstutorial.org/book/static_pages#aside-processes 
+- ps aux | grep <pattern_to_find>
+- kill -9 <process_id>
+- pkill -9 -f spring # kill all processes with name spring
+
+DONE. 
