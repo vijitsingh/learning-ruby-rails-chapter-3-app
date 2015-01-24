@@ -31,3 +31,20 @@ Commands ran to build this application :
 - Add route in routes.rb and then run rake test again
 - add empty action in the controller and run test again
 - add app/views/static_pages/about.html.erb and run test again which should pass now. 
+
+-- Adding Title to each of the three pages.
+- mv app/views/layouts/application.html.erb layout_file # temp change to understand the utility of layout
+- add assert_select "title", "Home | Ruby Book" For each of the actions in the test file 
+- now tests should fail. 
+- add title to the pages in the app/views/static_pages/*.html.erb ones. 
+- run tests again and now they should pass. 
+
+-- Using Embedded Ruby and layout to make pages dynamic in nature.
+- use provide and yield to add title and make the formats for the 3 .html.erb files same. 
+- run the tests to make sure they pass
+- mv layout_file app/views/layouts/application.html.erb
+- <title><%= yield(:title) %> | Rails Book</title> in the layout file. 
+- leave only the content part in the each of the 3 pages and then run test again. 
+
+-- Setting the Root Route
+- replace get with root 'static_pages#home'
