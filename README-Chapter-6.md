@@ -99,6 +99,10 @@
 	> !!user.authenticate("foobar")
 	=> true
 
+-- Pushing to heroku
+- git push heroku
+- heroku run rake db:migrate # NEED to run db migration in heroku
+- heroku run console --sandbox # verify by running this and then creating a user. 
 
 DONE. 
 
