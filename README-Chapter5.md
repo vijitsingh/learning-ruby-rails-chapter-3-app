@@ -38,3 +38,7 @@
 - Update home.html.erb with signup_path
 - Add custom HTML to the users/new.html.erb
 - rails server. 
+
+- Deploy to heroku and git.
+
+DONE. 
