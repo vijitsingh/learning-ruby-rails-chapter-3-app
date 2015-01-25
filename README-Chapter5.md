@@ -33,4 +33,8 @@
 - bundle exec rake test:integration # to run integration tests only, just test runs all the tests. 
 
 -- Adding the signup page and User controller
-- 
+- rails generate controller Users new
+- get 'signup' => 'users#new' to routes.rb
+- Update home.html.erb with signup_path
+- Add custom HTML to the users/new.html.erb
+- rails server. 
