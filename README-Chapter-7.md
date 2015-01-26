@@ -73,3 +73,10 @@
 
 -- Add an integration test for successful signup
 - use post_via_redirect commadn to add integration test in a similar way as created for unsuccessful signup.
+
+-- Professional deployment 
+- Submit changes and merge branch to master.
+- To enable SSL uncomment the ssl force line in : config/environments/production.rb 
+- Follow steps here to https://www.railstutorial.org/book/sign_up#sec-unicorn_in_production to use unicorn server on production. 
+
+DONE. 
