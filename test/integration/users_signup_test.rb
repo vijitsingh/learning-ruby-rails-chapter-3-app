@@ -17,5 +17,6 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     user_count_after = User.count
     assert_equal user_count_before + 1, user_count_after 
     assert_template "users/show"
+    assert is_logged_in?
   end
 end
