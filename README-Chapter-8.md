@@ -50,4 +50,50 @@
 - Call this method from delete method in sessions_controller.rb and redirect_to root_path
 - Update the test previously added for log_in to include log_out scenario as well. 
 
---
+-- Adding a remember-token and remember-digest
+- rails generate migration add_remember_digest_to_users remember_digest:string
+- bundle exec rake db:migrate 
+- In models/user.rb, add a method : User.new_token which returns : SecureRandom.urlsafe_base64 
+- In models/user.rb, add attr_accessor :remember_token
+- In models/user.rb, add a method remember which firstly calls new_token, and saves that value is self.remember_token. Then calls User.digest on this value and saves this in database by calling : update_attribute(:remember_digest, User.digest(remember_token))
+
+-- Login with remembering 
+- Add a method authenticated?(remember_token) in models/user.rb with BCrypt::Password.new(remember_digest).is_password?(remember_token) 
+- Add a method remember(user) in sessions_controller.rb with : 
+	* user.remember
+	* cookies.permanent.signed[:user_id] = user.id
+	* cookies.permanent[:remember_token] = user.remember_token
+- In sessions_helper current_user method, add an else if case which gets hit if session[:user_id] is NOT present : 
+	* Check for presence of user_id in cookies.signed[:user_id]
+	* Find value of user for this id from database : User.find_by(id: cookies.signed[:user_id])
+	* If user is present and user.authenticated?(cookies[:remember_token]), then firstly call login_user to start using session instead of cookies, and set @current_user = user. 
+- Call remember user from Create method of sessions_controller.rb. 
+- At this point of time, you can verify that closing of browser as well retains the user.
+- Also rake test should fail as we never log-out actually till 20 years even after calling lot-out. 
+
+-- Forgetting users
+- Add a forget method in user.rb where you set update_attribute(:remember_digest, nil)
+- Add a forget(user) method in sessions_helper.rb where : 
+   * user.forget
+   * cookies.delete(:user_id)
+   * cookies.delete(:remember_token)
+- Call this forget method from log_out - forget(current_user)
+- Verify now that logging out works correctly and the test passes correctly. 
+
+-- Two Subtle bugs
+- update the test case in test/integration/users_login_test.rb to delete logout_path again. This scenario may occur when the user is logged in 2 tabs in the same browser. And logout from one and tries to log out from another.
+- In sessions_controller.rb , delete method, call log_out only if logged_in?
+- Another issue could occur if you are logged in from 2 browsers, and log out from one, and try to load page on another, In this case since remember_token is nil, an error would be thrown in authenticated? method.
+- return if string passed to it is nil. 
+
+-- Remember Me
+- Add a checkbox in app/views/sessions/new.html.erb by using the f.label 
+- Add corresponding to this css
+- In app/controllers/sessions_controller.rb # create method, add : params[:session][:remember_me] == '1' ? remember(user) : forget(user) # I am NOT sure on why we need to explicitly call forget(user) here . 
+
+-- Remember tests
+- Add a method is_integration_test? in test_helper.rb which checks defined?(post_via_redirect)
+- Add a method log_in_as(user, options), which logins using post or sessions based on whether integration test or not, because post method is not available in unit-tests
+- Add 2 tests in user_login_test.rb : login with remember and login without remmeber. To verify in each check the value of cookies[:remember_token] whether it is nil or not. 
+
+-- Here they also add test for session_helper.rb for the untested branch, which I decided not to add for now. 
