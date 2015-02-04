@@ -97,3 +97,6 @@
 - Add 2 tests in user_login_test.rb : login with remember and login without remmeber. To verify in each check the value of cookies[:remember_token] whether it is nil or not. 
 
 -- Here they also add test for session_helper.rb for the untested branch, which I decided not to add for now. 
+
+DEPLOY TO HEROKU.
+DONE. 
