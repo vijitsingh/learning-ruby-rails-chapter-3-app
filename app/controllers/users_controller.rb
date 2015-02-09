@@ -16,7 +16,21 @@ class UsersController < ApplicationController
     else 
       render 'new'
     end 
+  end
+
+  def edit 
+    @user = User.find(params[:id])
   end 
+  
+  def update
+    @user = User.find(params[:id])
+    if @user.update_attributes(sanitize_user_params)
+      flash[:success] = "Profile Updated"
+      redirect_to @user
+    else
+      render 'edit'
+    end
+  end
   
   private
     def sanitize_user_params
