@@ -4,3 +4,8 @@ batman :
   name: "Bruce Wayne"
   email: "wayne@wayneindustries.com"
   password_digest: <%= User.digest("IAmBatman") %> 
+
+joker :
+  name: "joker"
+  email: "chaos@whysoserious.com"
+  password_digest: <%= User.digest("IAmBatman") %>
