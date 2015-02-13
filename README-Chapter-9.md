@@ -87,6 +87,6 @@
 - Add admin_user method above. 
 
 -- User destroy tests : https://www.railstutorial.org/book/updating_and_deleting_users#sec-user_destroy_tests
-- Decided to skip. 
+- Decided to skip.
 
 DONE. 
