@@ -44,4 +44,49 @@
 - call redirect_back_or(user) from create method of session-controller
 - modify test in user_edit_test.rb and change to : successful edit with friendly forwarding to test this functionality as well. 
 
--- 
+-- Add Users index page
+- Add a test-case in users-controller to redirect if not logged in and trying to access the index page. 
+- Add :index in the before_action list for :logged_in_user in user-controller
+- Add index action with @users = User.all
+- Add a index.html.erb to iterate over all users and show. Also add corresponding css.
+- Update the link in _header partial for Users to use users_path. 
+
+-- Adding Sample users and how to use db:seed to initialize the database
+- Add a faker gem in Gemfile and install.
+- in db/seeds.rb : add sample users by iterating, uses name = Faker::Name.name
+- bundle exec rake db:seed 
+- Shows a lot of users on the user page now. 
+
+-- Add pagination support for index users : https://www.railstutorial.org/book/updating_and_deleting_users#sec-pagination
+- Add gems will_paginate and bootstrap_will_paginate and install them
+- Add <%= will_paginate %> in top and bottom of the index.html.erb
+- add @users = User.paginate(page: params[:page]) in index method of user-controller. 
+- restart server and pagination works. 
+
+-- Add Users index test : https://www.railstutorial.org/book/updating_and_deleting_users#sec-users_index_test
+- Update users.yml fixture to add 30 dummy users using Faker::Name.name
+- rails generate integration_test users_index
+- add the test case "index including pagination" where you check that div.pagination is present, and divs corresponding to each user is present. Worth noting, how it tries User.paginate(page: 1) to figure out what all users would be shown and then checks for divs for them. 
+
+-- Partial refactoring : https://www.railstutorial.org/book/updating_and_deleting_users#sec-partial_refactoring 
+- I decided to skip since NOT make much sense 
+
+-- Add an admin attribute in user : https://www.railstutorial.org/book/updating_and_deleting_users#sec-administrative_users
+- rails generate migration add_admin_to_users admin:boolean
+- Add default: false in the generated above
+- run bundle exec rake db:migrate
+- I gave admin permissions to myself by loading User.frist in rails console, modifying the param and then user.save. Could have done by adding value in the generated list of users in db/seeds.rb
+- Automatically adds a method admin? because of boolean nature of the param. 
+- Note the presence of strong params (sanitize_params) allows here that no one is able to override admin attribute from web directly. 
+
+-- Adding the destroy action : https://www.railstutorial.org/book/updating_and_deleting_users#sec-the_destroy_action
+- Add <% if current_user.admin? && !current_user?(user) %> | <%= link_to "delete", user, method: :delete, data: { confirm: "You sure?" } %> <% end %> in index.html.erb
+- Add a destroy method in controller which User.find(params[:id]).delete, then updates flash message and redirect to users_url
+- Add before_action :admin_user, only: [:destroy] to make sure only admin users can issue this request. 
+- Also add :destroy in list for :logged_in_user
+- Add admin_user method above. 
+
+-- User destroy tests : https://www.railstutorial.org/book/updating_and_deleting_users#sec-user_destroy_tests
+- Decided to skip. 
+
+DONE. 
