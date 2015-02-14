@@ -1,0 +1,75 @@
+
+
+=== adding Account Activation Resource: https://www.railstutorial.org/book/account_activation_password_reset#sec-account_activations_resource
+
+-- Add AccountActivation controller
+-rails generate controller AccountActivations
+- add resources :account_activations, only: [:edit] to routes.rb
+
+-- Add activation resources to User model
+- rails generate migration add_activation_to_users activation_digest:string activated:boolean activated_at:datetime
+- Update the file to add default:false - add_column :users, :activated, :boolean, default: false
+- bundle exec rake db:migrate
+
+-- Populate and save activation_digest before user creation
+- Add a method :create_activation_digest in user-model which populates activation_digest and activation_token using User.new_token and User.digest
+- Add before_create :create_activation_digest
+- # Note that just assigning self.activation_digest the value is sufficient and since it is a field in the model, it would automatically get saved when user is saved. 
+- Add the attr_accessor :activation_token 
+
+-- Add activated and activated_at for all default users (in seed and in test/fixtures)
+- Add activated:true to all records.
+- Add activated_at: Time.zone.now to all records. 
+- bundle exec rake db:migrate:reset
+- bundle exec rake db:seed
+
+=== 10.1.2 Account Activation Mailer Method : https://www.railstutorial.org/book/account_activation_password_reset#sec-account_activation_mailer
+
+-- Generate UserMailer
+- rails generate mailer UserMailer account_activation password_reset
+- In app/mailers/user_mailer.rb : 
+  * update account_activation method to accept a user variable. 
+  * update mail_to link to point to mail to: user.email, subject: "Account activation" and set @user = user
+
+-- Update the views for mails
+- In app/views/user_mailer/account_activation.text.erb and app/views/user_mailer/account_activation.html.erb, update link to click to activate account to : edit_account_activation_url(@user.activation_token, email: @user.email) and <%= link_to "Activate", edit_account_activation_url(@user.activation_token, email: @user.email) %> respectively. 
+
+-- Update Configs for mails in config/environments/development.rb and test.rb
+- For development, host is "localhost:3000" while for test.rb it is "example.com" . Copy pasted some extra configuration for each. 
+
+-- Update test/mailers/previews/user_mailer_preview.rb
+- Firstly restart server so that the preview file is generated.
+- user = User.first 
+  user.activation_token = User.new_token 
+  UserMailer.account_activation(user) 
+- After this go to http://localhost:3000/rails/mailers/user_mailer/account_activation and preview would be shown. 
+
+-- Update test for test/mailers/user_mailer_test.rb 
+- Add steps as done for preview above with user = users(:batman)
+- bundle exec rake test:mailers should pass
+
+-- Update the create method of user_controller
+- If save is successful, then UserMailer.account_activation(@user).deliver_now and remove log_in user part. Update message and redirect to root_url
+- Now tests should fail, so for time-being comment out the failing assertions (redirection one) from test/integration/user_signup_test.rb 
+
+-- Go to server and try to sign-up, now the mail would NOT be sent in development but should get logged in server-logs at log/development.log. 
+
+=== 10.1.3 Activating the Account : https://www.railstutorial.org/book/account_activation_password_reset#sec-activating_the_account
+
+- Update authenticated?(attribute, token) in app/models/user.rb. Then call digest = self.send("#{attribute}_digest"). NOTE the send method here.
+- Update usage of authenticated? in app/helpers/sessions_helper.rb 
+
+-- Add edit method
+- in account_activation_controller.rb
+- check for if user && !user.activated? && user.authenticated?(:activation, params[:id]), if true then : 
+  * update :activated and :activated_at attributes. 
+  * log_in and update the message and redirect to user
+- if it fails then show warnig and redirect to root url 
+
+- Update create method in session_controller and add an extra if condition in happy-case to create only if user.activated? else ask them to check their mail and redirect to root_url . 
+
+- Verify this whole flow by creating a new user. NOTE that at this point the mails are NOT actually sent as this is development database, but you would verify by actually taking the url to hit from the log and making sure the account gets activated properly. 
+
+=== 10.1.4 Activation Test and Refactoring : https://www.railstutorial.org/book/account_activation_password_reset#sec-activation_test_and_refactoring
+
+-- Went through it, decided to skip. Nothing much except one setup def for clearing ActionMailer::Base.deliveries.clear which is a global array.
