@@ -115,4 +115,7 @@
 
 === 10.3 Email in production https://www.railstutorial.org/book/account_activation_password_reset#sec-email_in_production
 
--- 
+- Followed the exact steps as in link above. It took like 10 mins for the email to come.
+- More information on sendgrid : https://devcenter.heroku.com/articles/sendgrid
+
+DONE. 
