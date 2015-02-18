@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base 
-  attr_accessor :remember_token, :activation_token
+  attr_accessor :remember_token, :activation_token, :reset_token
   before_save {self.email = self.email.downcase}
   before_create :create_activation_digest
   validates :name, presence: true, length: {maximum: 50}
@@ -33,6 +33,20 @@ class User < ActiveRecord::Base
   # Remembers a user in the database for use in persistent sessions.
   def User.new_token 
     SecureRandom.urlsafe_base64
+  end
+
+  def create_reset_digest
+    self.reset_token = User.new_token
+    update_attribute(:reset_digest, User.digest(self.reset_token)) # NOTE here that we have to call update_attributes so that the value gets saved in db as well. 
+    update_attribute(:reset_sent_at, Time.zone.now)
+  end
+
+  def send_password_reset_mail
+    UserMailer.password_reset(self).deliver_now
+  end
+ 
+  def password_reset_expired?
+    reset_sent_at < 2.hours.ago
   end
 
   private 

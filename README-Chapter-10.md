@@ -73,3 +73,46 @@
 === 10.1.4 Activation Test and Refactoring : https://www.railstutorial.org/book/account_activation_password_reset#sec-activation_test_and_refactoring
 
 -- Went through it, decided to skip. Nothing much except one setup def for clearing ActionMailer::Base.deliveries.clear which is a global array.
+
+
+=== 10.2.1 Password Reset Resource : https://www.railstutorial.org/book/account_activation_password_reset#sec-password_resets_resource
+
+- rails generate controller PasswordResets new edit --no-test-framework. # NOTE the usage of --no-test-framework as we do NOT want to generate tests here as we woud test in integration level instead. 
+- resources :password_resets, only: [:new, :create, :edit, :update] in routes.rb
+- <%= link_to "(forgot password)", new_password_reset_path %> in the session/new.html.erb form
+- rails generate migration add_reset_to_users reset_digest:string reset_sent_at:datetime
+- bundle exec rake db:migrate
+
+=== 10.2.2 Password resets controller and form : https://www.railstutorial.org/book/account_activation_password_reset#sec-password_resets_controller_and_form
+
+- Added app/views/password_resets/new.html.erb . this is very similar to the submit form. just copied from here only
+- Added 2 methods create_reset_digest and send_password_reset_mail in app/model/user.rb
+- In create method of password_resets_controller, 
+  *  @user = User.find_by(email: params[:password_reset][:email].downcase)
+  * if user is present then call above two methods and then redirect to root_url with some message
+  * if not correct user, then show message and render 'new'
+- ADd :reset_token in attr_accessor of user.rb model
+- At this point behavior for invalid email submissiosn should work. 
+
+=== 10.2.3 Password Reset Mailer method : https://www.railstutorial.org/book/account_activation_password_reset#sec-password_reset_mailer
+
+- Exact same steps as used for setting up account_activation mailer above. 
+
+=== 10.2.4 Resetting the password : https://www.railstutorial.org/book/account_activation_password_reset#sec-resetting_the_password
+
+-- Add edit form and controller
+- Copied the edit form with password and confirmation as 2 fields. However added a hidden field for email so that update method know which email to update. Note that used : hidden_field_tag :email, @user.email instead of f.hidden_field :email, @user.email because the reset link puts the email in params[:email], whereas the latter would put it in params[:user][:email].
+- Added 2 helper private methods in reset-controller, get_user and valid_user (@user && @user.activated? && @user.authenticated?(:reset, params[:id])) and call them before :edit and :update actions. 
+- The form renders now if you generate and hit the reset url .
+
+-- Add update method in controller
+- https://www.railstutorial.org/book/account_activation_password_reset#code-password_reset_update_action shows the changes made. 
+- Add password_reset_expired? method in user-model : reset_sent_at < 2.hours.ago 
+- password reset should work now. 
+
+=== 10.2.5 https://www.railstutorial.org/book/account_activation_password_reset#sec-password_reset_test 
+- SKIPPING
+
+=== 10.3 Email in production https://www.railstutorial.org/book/account_activation_password_reset#sec-email_in_production
+
+-- 
